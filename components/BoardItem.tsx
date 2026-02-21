@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { logger } from "@/lib/logger";
 
 interface BoardItemProps {
     id: number;
@@ -9,7 +10,7 @@ interface BoardItemProps {
     note: string;
 }
 
-export default function BoardItem({ id, imageUrl, note }: BoardItemProps) {
+export default function BoardItem({ id: _id, imageUrl, note }: BoardItemProps) {
     const [imgError, setImgError] = useState(false);
 
     return (
@@ -25,7 +26,10 @@ export default function BoardItem({ id, imageUrl, note }: BoardItemProps) {
                         alt={note}
                         className="w-full object-cover"
                         loading="lazy"
-                        onError={() => setImgError(true)}
+                        onError={() => {
+                            logger.warn(`Failed to load image: ${imageUrl}`);
+                            setImgError(true);
+                        }}
                     />
                 </div>
             )}

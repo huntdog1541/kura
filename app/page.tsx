@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import BoardItem from "@/components/BoardItem";
 import UploadModal from "@/components/UploadModal";
 import { supabase } from "@/lib/supabase";
+import { logger } from "@/lib/logger";
 
 interface BoardItemData {
   id: number;
@@ -20,14 +21,17 @@ export default function MoodBoard() {
 
   useEffect(() => {
     async function fetchItems() {
+      logger.info("Fetching board items from Supabase");
       const { data, error } = await supabase
         .from("posts")
         .select("id, image_url, note")
         .order("created_at", { ascending: false });
 
       if (error) {
+        logger.error("Failed to fetch items from Supabase", error);
         setError("Failed to load items.");
       } else {
+        logger.info(`Successfully fetched ${(data ?? []).length} items`);
         setItems(data ?? []);
       }
       setLoading(false);
@@ -37,6 +41,7 @@ export default function MoodBoard() {
   }, []);
 
   async function handleAdd(url: string, note: string) {
+    logger.debug("Adding new item", { url, note });
     setError(null);
     const { data, error } = await supabase
       .from("posts")
@@ -45,8 +50,10 @@ export default function MoodBoard() {
       .single();
 
     if (error) {
+      logger.error("Failed to add item to Supabase", error);
       setError("Failed to add item.");
     } else if (data) {
+      logger.info(`Successfully added new item with ID: ${data.id}`);
       setItems((prev) => [data, ...prev]);
     }
   }
@@ -79,7 +86,7 @@ export default function MoodBoard() {
       ) : (
         <div className="max-w-6xl mx-auto columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4">
           {items.map((item) => (
-            <BoardItem key={item.id} imageUrl={item.image_url} note={item.note} />
+            <BoardItem key={item.id} id={item.id} imageUrl={item.image_url} note={item.note} />
           ))}
         </div>
       )}

@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { logger } from "@/lib/logger";
 
 interface UploadModalProps {
   isOpen: boolean;
@@ -17,7 +18,11 @@ export default function UploadModal({ isOpen, onClose, onAdd }: UploadModalProps
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!url.trim()) return;
+    if (!url.trim()) {
+      logger.warn("Attempted to submit form with empty URL");
+      return;
+    }
+    logger.debug("Form submitted with URL and note", { url, note });
     onAdd(url.trim(), note.trim());
     setUrl("");
     setNote("");
