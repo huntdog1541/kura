@@ -8,7 +8,7 @@ import { supabase } from "@/lib/supabase";
 
 interface BoardItemData {
   id: number;
-  url: string;
+  image_url: string;
   note: string;
 }
 
@@ -21,8 +21,8 @@ export default function MoodBoard() {
   useEffect(() => {
     async function fetchItems() {
       const { data, error } = await supabase
-        .from("board_items")
-        .select("id, url, note")
+        .from("posts")
+        .select("id, image_url, note")
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -38,9 +38,9 @@ export default function MoodBoard() {
 
   async function handleAdd(url: string, note: string) {
     const { data, error } = await supabase
-      .from("board_items")
-      .insert({ url, note })
-      .select("id, url, note")
+      .from("posts")
+      .insert({ image_url: url, note })
+      .select("id, image_url, note")
       .single();
 
     if (!error && data) {
@@ -76,7 +76,7 @@ export default function MoodBoard() {
       ) : (
         <div className="max-w-6xl mx-auto columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4">
           {items.map((item) => (
-            <BoardItem key={item.id} imageUrl={item.url} note={item.note} />
+            <BoardItem key={item.id} imageUrl={item.image_url} note={item.note} />
           ))}
         </div>
       )}
