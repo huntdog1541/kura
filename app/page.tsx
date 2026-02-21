@@ -1,38 +1,91 @@
 // app/page.tsx
-import BoardItem from '@/components/BoardItem';
+"use client";
 
-const MOCK_ITEMS = [
-  { id: 1, note: "Architecture inspiration", url: "https://images.unsplash.com/photo-1487958444681-f4201c046297" },
-  { id: 2, note: "Color palette: Sage & Sand", url: "https://images.unsplash.com/photo-1541701494587-cb58502866ab" },
-  { id: 3, note: "Workspace vibes", url: "https://images.unsplash.com/photo-1497215728101-856f4ea42174" },
-  { id: 4, note: "Minimalist UI concept", url: "https://images.unsplash.com/photo-1558655146-d09347e92766" },
-  { id: 5, note: "Textures", url: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853" },
-];
+import { useState, useEffect } from "react";
+import BoardItem from "@/components/BoardItem";
+import UploadModal from "@/components/UploadModal";
+import { supabase } from "@/lib/supabase";
+
+interface BoardItemData {
+  id: number;
+  url: string;
+  note: string;
+}
 
 export default function MoodBoard() {
-  return (
-      <main className="min-h-screen bg-[#f8f9fa] p-8">
-        {/* Header */}
-        <header className="max-w-6xl mx-auto mb-12 flex justify-between items-end">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Kura</h1>
-            <p className="text-gray-500 mt-2">Visual fragments and inspiration.</p>
-          </div>
-          <button className="bg-black text-white px-6 py-2 rounded-full font-medium hover:bg-gray-800 transition-colors">
-            Add Item
-          </button>
-        </header>
+  const [items, setItems] = useState<BoardItemData[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-        {/* Responsive Masonry Grid */}
+  useEffect(() => {
+    async function fetchItems() {
+      const { data, error } = await supabase
+        .from("board_items")
+        .select("id, url, note")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        setError("Failed to load items.");
+      } else {
+        setItems(data ?? []);
+      }
+      setLoading(false);
+    }
+
+    fetchItems();
+  }, []);
+
+  async function handleAdd(url: string, note: string) {
+    const { data, error } = await supabase
+      .from("board_items")
+      .insert({ url, note })
+      .select("id, url, note")
+      .single();
+
+    if (!error && data) {
+      setItems((prev) => [data, ...prev]);
+    }
+  }
+
+  return (
+    <main className="min-h-screen bg-[#f8f9fa] p-8">
+      {/* Header */}
+      <header className="max-w-6xl mx-auto mb-12 flex justify-between items-end">
+        <div>
+          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Kura</h1>
+          <p className="text-gray-500 mt-2">Visual fragments and inspiration.</p>
+        </div>
+        <button
+          onClick={() => setModalOpen(true)}
+          className="bg-black text-white px-6 py-2 rounded-full font-medium hover:bg-gray-800 transition-colors"
+        >
+          Add Item
+        </button>
+      </header>
+
+      {/* Board */}
+      {loading ? (
+        <p className="max-w-6xl mx-auto text-center text-gray-400 py-24">Loading...</p>
+      ) : error ? (
+        <p className="max-w-6xl mx-auto text-center text-red-400 py-24">{error}</p>
+      ) : items.length === 0 ? (
+        <p className="max-w-6xl mx-auto text-center text-gray-400 py-24">
+          No items yet — add your first one!
+        </p>
+      ) : (
         <div className="max-w-6xl mx-auto columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4">
-          {MOCK_ITEMS.map((item) => (
-              <BoardItem
-                  key={item.id}
-                  imageUrl={item.url}
-                  note={item.note}
-              />
+          {items.map((item) => (
+            <BoardItem key={item.id} imageUrl={item.url} note={item.note} />
           ))}
         </div>
-      </main>
+      )}
+
+      <UploadModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onAdd={handleAdd}
+      />
+    </main>
   );
 }
