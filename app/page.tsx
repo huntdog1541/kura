@@ -59,16 +59,16 @@ export default function MoodBoard() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f8f9fa] p-8">
+    <main className="min-h-screen bg-gradient-to-br from-violet-50 via-fuchsia-50 to-amber-50 p-8">
       {/* Header */}
       <header className="max-w-6xl mx-auto mb-12 flex justify-between items-end">
         <div>
-          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Kura</h1>
+          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-violet-600 via-pink-500 to-orange-400 bg-clip-text text-transparent">Kura</h1>
           <p className="text-gray-500 mt-2">Visual fragments and inspiration.</p>
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          className="bg-black text-white px-6 py-2 rounded-full font-medium hover:bg-gray-800 transition-colors"
+          className="bg-gradient-to-r from-violet-500 to-pink-500 text-white px-6 py-2 rounded-full font-medium hover:from-violet-600 hover:to-pink-600 transition-all shadow-md hover:shadow-lg hover:shadow-pink-200"
         >
           Add Item
         </button>
