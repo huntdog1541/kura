@@ -37,13 +37,16 @@ export default function MoodBoard() {
   }, []);
 
   async function handleAdd(url: string, note: string) {
+    setError(null);
     const { data, error } = await supabase
       .from("posts")
       .insert({ image_url: url, note })
       .select("id, image_url, note")
       .single();
 
-    if (!error && data) {
+    if (error) {
+      setError("Failed to add item.");
+    } else if (data) {
       setItems((prev) => [data, ...prev]);
     }
   }

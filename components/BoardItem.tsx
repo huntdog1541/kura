@@ -1,12 +1,15 @@
 // components/BoardItem.tsx
+"use client";
+
 import { useState } from "react";
 
 interface BoardItemProps {
+    id: number;
     imageUrl: string;
     note: string;
 }
 
-export default function BoardItem({ imageUrl, note }: BoardItemProps) {
+export default function BoardItem({ id, imageUrl, note }: BoardItemProps) {
     const [imgError, setImgError] = useState(false);
 
     return (
@@ -16,13 +19,15 @@ export default function BoardItem({ imageUrl, note }: BoardItemProps) {
                     Image unavailable
                 </div>
             ) : (
-                <img
-                    src={imageUrl}
-                    alt={note}
-                    className="w-full object-cover"
-                    loading="lazy"
-                    onError={() => setImgError(true)}
-                />
+                <div className="relative w-full">
+                    <img
+                        src={imageUrl}
+                        alt={note}
+                        className="w-full object-cover"
+                        loading="lazy"
+                        onError={() => setImgError(true)}
+                    />
+                </div>
             )}
 
             {/* Caption Overlay */}
